@@ -150,6 +150,9 @@ type ControlPlaneComponent struct {
 	// ExtraVolumes is an extra set of host volumes, mounted to the control plane component.
 	// +optional
 	ExtraVolumes []HostPathMount `json:"extraVolumes,omitempty"`
+
+	// ImageMeta allows to customize the image used for the controlplane component
+	ImageMeta `json:",inline"`
 }
 
 // APIServer holds settings necessary for API server deployments in the cluster
@@ -186,6 +189,9 @@ type ImageMeta struct {
 	// In case this value is set, kubeadm does not change automatically the version of the above components during upgrades.
 	// +optional
 	ImageTag string `json:"imageTag,omitempty"`
+
+	// ImageName allows to specify the image name
+	ImageName string `json:"imageName,omitempty"`
 
 	//TODO: evaluate if we need also a ImageName based on user feedbacks
 }

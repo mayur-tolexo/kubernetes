@@ -52,11 +52,22 @@ func GetStaticPodSpecs(cfg *kubeadmapi.ClusterConfiguration, endpoint *kubeadmap
 	// Get the required hostpath mounts
 	mounts := getHostPathVolumesForTheControlPlane(cfg)
 
+	// setting default images for control plane components
+	if cfg.APIServer.Image == "" {
+		cfg.APIServer.Image = kubeadmconstants.KubeAPIServer
+	}
+	if cfg.ControllerManager.Image == "" {
+		cfg.ControllerManager.Image = kubeadmconstants.KubeControllerManager
+	}
+	if cfg.Scheduler.Image == "" {
+		cfg.Scheduler.Image = kubeadmconstants.KubeScheduler
+	}
+
 	// Prepare static pod specs
 	staticPodSpecs := map[string]v1.Pod{
 		kubeadmconstants.KubeAPIServer: staticpodutil.ComponentPod(v1.Container{
 			Name:            kubeadmconstants.KubeAPIServer,
-			Image:           images.GetKubernetesImage(kubeadmconstants.KubeAPIServer, cfg),
+			Image:           images.GetKubernetesImageFromImageMeta(cfg.APIServer.ImageMeta, cfg),
 			ImagePullPolicy: v1.PullIfNotPresent,
 			Command:         getAPIServerCommand(cfg, endpoint),
 			VolumeMounts:    staticpodutil.VolumeMountMapToSlice(mounts.GetVolumeMounts(kubeadmconstants.KubeAPIServer)),
@@ -69,7 +80,7 @@ func GetStaticPodSpecs(cfg *kubeadmapi.ClusterConfiguration, endpoint *kubeadmap
 			map[string]string{kubeadmconstants.KubeAPIServerAdvertiseAddressEndpointAnnotationKey: endpoint.String()}),
 		kubeadmconstants.KubeControllerManager: staticpodutil.ComponentPod(v1.Container{
 			Name:            kubeadmconstants.KubeControllerManager,
-			Image:           images.GetKubernetesImage(kubeadmconstants.KubeControllerManager, cfg),
+			Image:           images.GetKubernetesImageFromImageMeta(cfg.ControllerManager.ImageMeta, cfg),
 			ImagePullPolicy: v1.PullIfNotPresent,
 			Command:         getControllerManagerCommand(cfg),
 			VolumeMounts:    staticpodutil.VolumeMountMapToSlice(mounts.GetVolumeMounts(kubeadmconstants.KubeControllerManager)),
@@ -80,7 +91,7 @@ func GetStaticPodSpecs(cfg *kubeadmapi.ClusterConfiguration, endpoint *kubeadmap
 		}, mounts.GetVolumes(kubeadmconstants.KubeControllerManager), nil),
 		kubeadmconstants.KubeScheduler: staticpodutil.ComponentPod(v1.Container{
 			Name:            kubeadmconstants.KubeScheduler,
-			Image:           images.GetKubernetesImage(kubeadmconstants.KubeScheduler, cfg),
+			Image:           images.GetKubernetesImageFromImageMeta(cfg.Scheduler.ImageMeta, cfg),
 			ImagePullPolicy: v1.PullIfNotPresent,
 			Command:         getSchedulerCommand(cfg),
 			VolumeMounts:    staticpodutil.VolumeMountMapToSlice(mounts.GetVolumeMounts(kubeadmconstants.KubeScheduler)),

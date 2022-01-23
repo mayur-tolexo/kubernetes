@@ -374,6 +374,9 @@ func Convert_kubeadm_ClusterConfiguration_To_v1beta3_ClusterConfiguration(in *ku
 func autoConvert_v1beta3_ControlPlaneComponent_To_kubeadm_ControlPlaneComponent(in *ControlPlaneComponent, out *kubeadm.ControlPlaneComponent, s conversion.Scope) error {
 	out.ExtraArgs = *(*map[string]string)(unsafe.Pointer(&in.ExtraArgs))
 	out.ExtraVolumes = *(*[]kubeadm.HostPathMount)(unsafe.Pointer(&in.ExtraVolumes))
+	if err := Convert_v1beta3_ImageMeta_To_kubeadm_ImageMeta(&in.ImageMeta, &out.ImageMeta, s); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -385,6 +388,9 @@ func Convert_v1beta3_ControlPlaneComponent_To_kubeadm_ControlPlaneComponent(in *
 func autoConvert_kubeadm_ControlPlaneComponent_To_v1beta3_ControlPlaneComponent(in *kubeadm.ControlPlaneComponent, out *ControlPlaneComponent, s conversion.Scope) error {
 	out.ExtraArgs = *(*map[string]string)(unsafe.Pointer(&in.ExtraArgs))
 	out.ExtraVolumes = *(*[]HostPathMount)(unsafe.Pointer(&in.ExtraVolumes))
+	if err := Convert_kubeadm_ImageMeta_To_v1beta3_ImageMeta(&in.ImageMeta, &out.ImageMeta, s); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -538,6 +544,7 @@ func Convert_kubeadm_HostPathMount_To_v1beta3_HostPathMount(in *kubeadm.HostPath
 func autoConvert_v1beta3_ImageMeta_To_kubeadm_ImageMeta(in *ImageMeta, out *kubeadm.ImageMeta, s conversion.Scope) error {
 	out.ImageRepository = in.ImageRepository
 	out.ImageTag = in.ImageTag
+	out.ImageName = in.ImageName
 	return nil
 }
 
@@ -549,6 +556,7 @@ func Convert_v1beta3_ImageMeta_To_kubeadm_ImageMeta(in *ImageMeta, out *kubeadm.
 func autoConvert_kubeadm_ImageMeta_To_v1beta3_ImageMeta(in *kubeadm.ImageMeta, out *ImageMeta, s conversion.Scope) error {
 	out.ImageRepository = in.ImageRepository
 	out.ImageTag = in.ImageTag
+	out.ImageName = in.ImageName
 	return nil
 }
 

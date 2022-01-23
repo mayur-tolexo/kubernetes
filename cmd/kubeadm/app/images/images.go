@@ -79,11 +79,17 @@ func GetEtcdImage(cfg *kubeadmapi.ClusterConfiguration) string {
 	if warning != nil {
 		klog.Warningln(warning)
 	}
+	imageName := constants.Etcd
 	// unless an override is specified
-	if cfg.Etcd.Local != nil && cfg.Etcd.Local.ImageTag != "" {
-		etcdImageTag = cfg.Etcd.Local.ImageTag
+	if cfg.Etcd.Local != nil {
+		if cfg.Etcd.Local.ImageTag != "" {
+			etcdImageTag = cfg.Etcd.Local.ImageTag
+		}
+		if cfg.Etcd.Local.ImageName != "" {
+			imageName = cfg.Etcd.Local.ImageName
+		}
 	}
-	return GetGenericImage(etcdImageRepository, constants.Etcd, etcdImageTag)
+	return GetGenericImage(etcdImageRepository, imageName, etcdImageTag)
 }
 
 // GetControlPlaneImages returns a list of container images kubeadm expects to use on a control plane node
@@ -113,4 +119,17 @@ func GetControlPlaneImages(cfg *kubeadmapi.ClusterConfiguration) []string {
 // GetPauseImage returns the image for the "pause" container
 func GetPauseImage(cfg *kubeadmapi.ClusterConfiguration) string {
 	return GetGenericImage(cfg.ImageRepository, "pause", constants.PauseVersion)
+}
+
+// GetKubernetesImageFromImageMeta generates and returns the image for the components managed in the Kubernetes main repository,
+// including the control-plane components and kube-proxy.
+// Is uses the image meta fields to determine the image details
+func GetKubernetesImageFromImageMeta(image kubeadmapi.ImageMeta, cfg *kubeadmapi.ClusterConfiguration) string {
+	if image.ImageRepository == "" {
+		image.ImageRepository = cfg.GetControlPlaneImageRepository()
+	}
+	if image.ImageTag == "" {
+		image.ImageTag = kubeadmutil.KubernetesVersionToImageTag(cfg.KubernetesVersion)
+	}
+	return GetGenericImage(image.ImageRepository, image.ImageName, image.ImageTag)
 }
