@@ -174,6 +174,7 @@ func (in *ControlPlaneComponent) DeepCopyInto(out *ControlPlaneComponent) {
 		*out = make([]HostPathMount, len(*in))
 		copy(*out, *in)
 	}
+	out.ImageMeta = in.ImageMeta
 	return
 }
 
